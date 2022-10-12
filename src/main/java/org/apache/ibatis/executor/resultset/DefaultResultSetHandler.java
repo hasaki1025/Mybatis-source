@@ -187,7 +187,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     ResultSetWrapper rsw = getFirstResultSet(stmt);//获取ResultSetWrapper
 
     List<ResultMap> resultMaps = mappedStatement.getResultMaps();//获取该mappedStatement需要的ResultMap数量
-    int resultMapCount = resultMaps.size();//返回的结果条数
+    int resultMapCount = resultMaps.size();//ResultMap的数量
     validateResultMapsCount(rsw, resultMapCount);//校验ResultMap的数量至少为1（在指定了ResultMap的情况下）
     while (rsw != null && resultMapCount > resultSetCount) {//resultMapCount > resultSetCount保证ResultMap的数量需要ResultSet的数量
       ResultMap resultMap = resultMaps.get(resultSetCount);//获取ResultMap
@@ -432,7 +432,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     for (ResultMapping propertyMapping : propertyMappings) {
       String column = prependPrefix(propertyMapping.getColumn(), columnPrefix);//拼接列名（ResultMap中）
       if (propertyMapping.getNestedResultMapId() != null) {
-        // the user added a column attribute to a nested result map, ignore it
+        // 用户将列属性添加到嵌套结果映射，忽略它
         column = null;
       }
       if (propertyMapping.isCompositeResult()//如果是复合结果（一个ResultMapping中含有多个ResultMapping）
@@ -440,7 +440,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
           || propertyMapping.getResultSet() != null) {//ResultMap中还没有存储ResultSet
         Object value = getPropertyMappingValue(rsw.getResultSet(), metaObject, propertyMapping, lazyLoader, columnPrefix);//获取该列的值
         // issue #541 make property optional
-        final String property = propertyMapping.getProperty();//获取结果类中该成员的名称
+        final String property = propertyMapping.getProperty();//获取ResultMap中该成员的名称
         if (property == null) {
           continue;
         } else if (value == DEFERRED) {
@@ -450,8 +450,8 @@ public class DefaultResultSetHandler implements ResultSetHandler {
         if (value != null) {
           foundValues = true;
         }
-        if (value != null || (configuration.isCallSettersOnNulls() && !metaObject.getSetterType(property).isPrimitive())) {
-          // gcode issue #377, call setter on nulls (value is not 'found')
+        if (value != null || (configuration.isCallSettersOnNulls() && !metaObject.getSetterType(property).isPrimitive())) {//如果值不为null或者可以在null上执行set方法且当前set方法设置的值不是原始类型
+          // gcode 问题 377，在 null 上调用 setter（值不是“找到”）
           metaObject.setValue(property, value);//执行set方法注入
         }
       }
@@ -478,7 +478,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
     List<UnMappedColumnAutoMapping> autoMapping = autoMappingsCache.get(mapKey);//查看缓存中是否存在该mapkey对应的自动映射Map
     if (autoMapping == null) {//缓存中没有的情况下
       autoMapping = new ArrayList<>();//用于存储未映射列名的集合
-      final List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(resultMap, columnPrefix);//获取未映射的列名集合（通过MapKey）
+      final List<String> unmappedColumnNames = rsw.getUnmappedColumnNames(resultMap, columnPrefix);//获取未映射的列名集合（通过MapKey），未映射的列名指的是带有列名前缀的列
       for (String columnName : unmappedColumnNames) {//对于未映射列名的集合的处理
         String propertyName = columnName;
         if (columnPrefix != null && !columnPrefix.isEmpty()) {//含有列名前缀的前提下
@@ -490,7 +490,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
             continue;
           }
         }
-        final String property = metaObject.findProperty(propertyName, configuration.isMapUnderscoreToCamelCase());//从resultMap找到该值
+        final String property = metaObject.findProperty(propertyName, configuration.isMapUnderscoreToCamelCase());//从metaObject找到该属性名称
         if (property != null && metaObject.hasSetter(property)) {//如果在metaObject中找到了该成员变量并且该成员变量含有set方法则
           if (resultMap.getMappedProperties().contains(property)) {//排除mappedProperties中的属性
             continue;
@@ -612,7 +612,7 @@ public class DefaultResultSetHandler implements ResultSetHandler {
       return createPrimitiveResultObject(rsw, resultMap, columnPrefix);//创建原始结果对象
     } else if (!constructorMappings.isEmpty()) {//如果含有构造方法mapping
       return createParameterizedResultObject(rsw, resultType, constructorMappings, constructorArgTypes, constructorArgs, columnPrefix);
-    } else if (resultType.isInterface() || metaType.hasDefaultConstructor()) {//如果resultType是接口并且含有默认的构造方法
+    } else if (resultType.isInterface() || metaType.hasDefaultConstructor()) {//如果resultType是接口或者含有默认的构造方法
       return objectFactory.create(resultType);//采用objectFactory创建
     } else if (shouldApplyAutomaticMappings(resultMap, false)) {
       return createByConstructorSignature(rsw, resultType, constructorArgTypes, constructorArgs);

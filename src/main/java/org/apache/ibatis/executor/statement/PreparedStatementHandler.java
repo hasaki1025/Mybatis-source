@@ -80,7 +80,7 @@ public class PreparedStatementHandler extends BaseStatementHandler {
       if (keyColumnNames == null) {
         return connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
       } else {
-        return connection.prepareStatement(sql, keyColumnNames);
+        return connection.prepareStatement(sql, keyColumnNames);//创建一个默认的PreparedStatement对象，该对象能够返回给定数组指定的自动生成的键
       }
     } else if (mappedStatement.getResultSetType() == ResultSetType.DEFAULT) {
       return connection.prepareStatement(sql);//如果采用连接池则这里的Connection为代理对象会先进入PooledConnection的invoke方法

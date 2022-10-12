@@ -163,7 +163,7 @@ public abstract class BaseExecutor implements Executor {
         deferredLoad.load();
       }
       // issue #601
-      deferredLoads.clear();//清除延迟加载
+      deferredLoads.clear();//清空延迟加载
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {//如果本地缓存作用域是STATEMENT则清除缓存
         // issue #482
         clearLocalCache();
